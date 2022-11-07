@@ -3,7 +3,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 const cors = require('cors');
 
 //* middleware
@@ -11,12 +11,13 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send('genius car server practice1 is running!')
+    res.send('genius car server is running!')
 })
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.drjbcpx.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+console.log(uri)
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -25,7 +26,7 @@ function verifyJWT(req, res, next) {
     const token = authHeader.split(' ')[1];
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
         if (err) {
-            return res.status(403).send({ message: 'unauthorized access' })
+            return res.status(403).send({ message: 'forbidden access' })
         }
         req.decoded = decoded;
         next();
@@ -34,8 +35,8 @@ function verifyJWT(req, res, next) {
 
 async function run() {
     try {
-        const serviceCollection = client.db('geniusCarPractice1').collection('services');
-        const ordersCollection = client.db('geniusCarPractice1').collection('orders');
+        const serviceCollection = client.db('geniusCar').collection('services');
+        const ordersCollection = client.db('geniusCar').collection('orders');
 
         app.post('/jwt', (req, res) => {
             const user = req.body;
