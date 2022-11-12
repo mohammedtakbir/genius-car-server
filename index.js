@@ -45,8 +45,24 @@ async function run() {
         })
 
         app.get('/services', async (req, res) => {
-            const query = {};
-            const cursor = serviceCollection.find(query);
+            const search = req.query.search;
+            let query = {};
+            if (search.length) {
+                query = {
+                    $text: {
+                        $search: search
+                    }
+                }
+            }
+            console.log(search)
+            // const query = { price: { $gt: 160, $lt: 300 } };
+            // const query = { price: { $eq: 200 } };
+            // const query = { price: { $gte: 150 } };
+            // const query = { price: { $ne: 150 } };
+            // const query = { price: { $nin: [150, 200] } };
+            // const query = { $and: [{ price: { $gt: 20 } }, { title: 'Engine Oil Change' }] };
+            const order = req.query.order === 'ascending' ? 1 : -1;
+            const cursor = serviceCollection.find(query).sort({ price: order });
             const services = await cursor.toArray();
             res.send(services);
         })
@@ -62,7 +78,7 @@ async function run() {
 
         app.get('/orders', verifyJWT, async (req, res) => {
             const decoded = req.decoded;
-            if(decoded.email !== req.query.email){
+            if (decoded.email !== req.query.email) {
                 res.status(403).send({ message: 'unauthorized access' })
             }
             let query = {};
